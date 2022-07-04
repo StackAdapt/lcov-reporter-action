@@ -116011,7 +116011,7 @@ function delta(lcov, before) {
 
         const pbefore = percentage(before);
         const pafter = percentage(lcov);
-        return (pafter - pbefore)
+        return (pafter - pbefore).toFixed(2)
 }
 
 function diff(lcov, before, options) {
@@ -116034,6 +116034,9 @@ function diff(lcov, before, options) {
 			: `Coverage for this commit`,
 		table(
 			tbody(
+				tr(
+					th("Coverage"), th("Diff"),
+				),
 				tr(
 					th(pafter.toFixed(2), "%"),
 					th(arrow, " ", plus, pdiff.toFixed(2), "%"),
