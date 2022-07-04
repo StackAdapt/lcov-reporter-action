@@ -58,8 +58,8 @@ export function diff(lcov, before, options) {
 					th("Coverage"), th("Delta"),
 				),
 				tr(
-					td(pafter.toFixed(2), "%"),
-					td(arrow, " ", plus, pdiff.toFixed(2), "%"),
+					th(pafter.toFixed(2), "%"),
+					th(arrow, " ", plus, pdiff.toFixed(2), "%"),
 				),
 			),
 		),
