@@ -55,11 +55,11 @@ export function diff(lcov, before, options) {
 		table(
 			tbody(
 				tr(
-					th("Coverage"), th("Diff"),
+					th("Coverage"), th("Delta"),
 				),
 				tr(
-					th(pafter.toFixed(2), "%"),
-					th(arrow, " ", plus, pdiff.toFixed(2), "%"),
+					td(pafter.toFixed(2), "%"),
+					td(arrow, " ", plus, pdiff.toFixed(2), "%"),
 				),
 			),
 		),

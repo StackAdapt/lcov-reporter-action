@@ -115803,7 +115803,7 @@ function tag(name) {
 const details = tag("details");
 const summary$1 = tag("summary");
 const tr = tag("tr");
-const td = tag("td");
+const td$1 = tag("td");
 const th = tag("th");
 const b = tag("b");
 const table = tag("table");
@@ -115873,7 +115873,7 @@ function toFolder(path) {
 		return ""
 	}
 
-	return tr(td({ colspan: 6 }, b(path)))
+	return tr(td$1({ colspan: 6 }, b(path)))
 }
 
 function getStatement(file) {
@@ -115896,12 +115896,12 @@ function getStatement(file) {
 
 function toRow(file, indent, options) {
 	return tr(
-		td(filename(file, indent, options)),
-		td(percentage$1(getStatement(file))),
-		td(percentage$1(file.branches)),
-		td(percentage$1(file.functions)),
-		td(percentage$1(file.lines)),
-		td(uncovered(file, options)),
+		td$1(filename(file, indent, options)),
+		td$1(percentage$1(getStatement(file))),
+		td$1(percentage$1(file.branches)),
+		td$1(percentage$1(file.functions)),
+		td$1(percentage$1(file.lines)),
+		td$1(uncovered(file, options)),
 	)
 }
 
@@ -116035,11 +116035,11 @@ function diff(lcov, before, options) {
 		table(
 			tbody(
 				tr(
-					th("Coverage"), th("Diff"),
+					th("Coverage"), th("Delta"),
 				),
 				tr(
-					th(pafter.toFixed(2), "%"),
-					th(arrow, " ", plus, pdiff.toFixed(2), "%"),
+					td(pafter.toFixed(2), "%"),
+					td(arrow, " ", plus, pdiff.toFixed(2), "%"),
 				),
 			),
 		),
