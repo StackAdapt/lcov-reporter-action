@@ -59,7 +59,7 @@ async function main() {
 
 	const lcov = await parse(raw)
 	const baselcov = baseRaw && (await parse(baseRaw))
-	const newdelta = await delta(lcov, baselcov)
+	const newdelta = await delta(lcov, baselcov, options)
 	if (newdelta < 0) {
 		console.log(`Coverage after merging is ${newdelta}% compare with baseline branch, exiting...`)
 		process.exit(1)

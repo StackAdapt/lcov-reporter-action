@@ -24,7 +24,7 @@ export function comment(lcov, options) {
 	)
 }
 
-export function delta(lcov, before) {
+export function delta(lcov, before, options) {
         if (!before) {
                 return comment(lcov, options)
         }
