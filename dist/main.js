@@ -116004,7 +116004,7 @@ function comment(lcov, options) {
 	)
 }
 
-function delta(lcov, before) {
+function delta(lcov, before, options) {
         if (!before) {
                 return comment(lcov, options)
         }
@@ -116175,7 +116175,7 @@ async function main$1() {
 
 	const lcov = await parse$2(raw);
 	const baselcov = baseRaw && (await parse$2(baseRaw));
-	const newdelta = await delta(lcov, baselcov);
+	const newdelta = await delta(lcov, baselcov, options);
 	if (newdelta < 0) {
 		console.log(`Coverage after merging is ${newdelta}% compare with baseline branch, exiting...`);
 		process.exit(1);
