@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: lcov-reporter-action
+  description: andytest repo for testing
+  annotations:
+    github.com/StackAdapt: lcov-reporter-action
+spec:
+  type: other
+  lifecycle: production
+  owner: andy.li tester
