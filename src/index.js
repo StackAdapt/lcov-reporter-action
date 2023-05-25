@@ -21,17 +21,19 @@ async function main() {
 	const shouldDeleteOldComments =
 		core.getInput("delete-old-comments").toLowerCase() === "true"
 	const title = core.getInput("title")
+	const shouldExitIfCoverageDecrease =
+		core.getInput("exit-if-coverage-decrease").toLowerCase() === "true"
 
 	const raw = await fs.readFile(lcovFile, "utf-8").catch(err => null)
 	if (!raw) {
-		console.log(`No coverage report found at '${lcovFile}', exiting...`)
+		console.info(`No coverage report found at '${lcovFile}', exiting...`)
 		process.exit(1)
 	}
 
 	const baseRaw =
 		baseFile && (await fs.readFile(baseFile, "utf-8").catch(err => null))
 	if (baseFile && !baseRaw) {
-		console.log(`No coverage report found at '${baseFile}', ignoring...`)
+		console.info(`No coverage report found at '${baseFile}', ignoring...`)
 	}
 
 	const options = {
@@ -61,8 +63,11 @@ async function main() {
 	const baselcov = baseRaw && (await parse(baseRaw))
 	const newdelta = await delta(lcov, baselcov, options)
 	if (newdelta < 0) {
-		console.log(`Coverage after merging is ${newdelta}% compare with baseline branch, exiting...`)
-		process.exit(1)
+		console.info(`Coverage after merging is ${newdelta}% compare with baseline branch.`)
+		if (shouldExitIfCoverageDecrease) {
+			console.info(`Exiting...`)
+			process.exit(1)
+		}
 	}
 
 	const body = diff(lcov, baselcov, options).substring(0, MAX_COMMENT_CHARS)
