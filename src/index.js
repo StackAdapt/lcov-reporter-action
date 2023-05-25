@@ -64,10 +64,10 @@ async function main() {
 	const newdelta = await delta(lcov, baselcov, options)
 	if (newdelta < 0) {
 		console.log(`Coverage after merging is ${newdelta}% compare with baseline branch.`)
-        if (shouldExitIfCoverageDecrease) {
-		    console.log(`Exiting...`)
-		    process.exit(1)
-        }
+		if (shouldExitIfCoverageDecrease) {
+			console.log(`Exiting...`)
+			process.exit(1)
+		}
 	}
 
 	const body = diff(lcov, baselcov, options).substring(0, MAX_COMMENT_CHARS)
