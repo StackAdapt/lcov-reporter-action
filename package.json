@@ -1,6 +1,6 @@
 {
   "name": "lcov-reporter-action",
-  "version": "0.2.19",
+  "version": "0.4.2",
   "description": "Comments a pull request with the lcov code coverage",
   "license": "MIT",
   "author": "Romeo Van Snick",
@@ -25,12 +25,15 @@
     "@actions/core": "^1.9.1",
     "@actions/github": "^1.1.0",
     "encoding": "^0.1.13",
-    "lcov-parse": "^1.0.0"
+    "lcov-parse": "^1.0.0",
+    "octokit-next": "^1.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",
     "@babel/node": "^7.8.4",
     "@babel/preset-env": "^7.12.11",
+    "@octokit-next/endpoint": "^2.7.0",
+    "@octokit-next/request-error": "^2.7.0",
     "@rollup/plugin-commonjs": "^11.0.2",
     "@rollup/plugin-json": "^4.0.2",
     "@rollup/plugin-node-resolve": "^7.1.1",
