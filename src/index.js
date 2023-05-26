@@ -26,14 +26,14 @@ async function main() {
 
 	const raw = await fs.readFile(lcovFile, "utf-8").catch(err => null)
 	if (!raw) {
-		console.log(`No coverage report found at '${lcovFile}', exiting...`)
+		console.info(`No coverage report found at '${lcovFile}', exiting...`)
 		process.exit(1)
 	}
 
 	const baseRaw =
 		baseFile && (await fs.readFile(baseFile, "utf-8").catch(err => null))
 	if (baseFile && !baseRaw) {
-		console.log(`No coverage report found at '${baseFile}', ignoring...`)
+		console.info(`No coverage report found at '${baseFile}', ignoring...`)
 	}
 
 	const options = {

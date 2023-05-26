@@ -1,0 +1,23 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: lcov-reporter-action
+  description: GitHub action script for lcov-reporter-action
+  tags:
+    - javascript
+  links:
+    - url: https://github.com/StackAdapt/lcov-reporter-action
+      title: code repo
+      icon: GitHub
+      type: repo
+
+spec:
+  owner: user:andyli86
+  type: scripts
+  lifecycle: production
+  service-tier: tbd
+  security-tier: tbd
+  sa-environment: tbd
+  sa-infra: tbd
+  sa-service: tbd
+  partOf: na
