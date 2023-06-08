@@ -12,6 +12,6 @@ metadata:
       type: repo
 
 spec:
-  owner: user:andyli86
+  owner: devops
   type: github-action
   lifecycle: production
