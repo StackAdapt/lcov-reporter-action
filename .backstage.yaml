@@ -13,11 +13,5 @@ metadata:
 
 spec:
   owner: user:andyli86
-  type: scripts
+  type: github-action
   lifecycle: production
-  service-tier: tbd
-  security-tier: tbd
-  sa-environment: tbd
-  sa-infra: tbd
-  sa-service: tbd
-  partOf: na
