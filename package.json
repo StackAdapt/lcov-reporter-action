@@ -24,6 +24,7 @@
   "dependencies": {
     "@actions/core": "^1.9.1",
     "@actions/github": "^1.1.0",
+    "@octokit/core": "^4.2.4",
     "encoding": "^0.1.13",
     "lcov-parse": "^1.0.0",
     "octokit-next": "^1.2.1"

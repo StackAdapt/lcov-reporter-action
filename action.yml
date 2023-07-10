@@ -30,6 +30,10 @@ inputs:
   title:
     description: Title to add to the comment
     required: false
+  lcov-decrease-threshold:
+    description: The threshold allowance for code coverage decrease
+    required: false
+    default: 0
 runs:
   using: 'node16'
   main: dist/main.js
