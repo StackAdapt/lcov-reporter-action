@@ -886,6 +886,10 @@ function checkBypass(reqUrl) {
     if (!reqUrl.hostname) {
         return false;
     }
+    const reqHost = reqUrl.hostname;
+    if (isLoopbackAddress(reqHost)) {
+        return true;
+    }
     const noProxy = process.env['no_proxy'] || process.env['NO_PROXY'] || '';
     if (!noProxy) {
         return false;
@@ -911,13 +915,24 @@ function checkBypass(reqUrl) {
         .split(',')
         .map(x => x.trim().toUpperCase())
         .filter(x => x)) {
-        if (upperReqHosts.some(x => x === upperNoProxyItem)) {
+        if (upperNoProxyItem === '*' ||
+            upperReqHosts.some(x => x === upperNoProxyItem ||
+                x.endsWith(`.${upperNoProxyItem}`) ||
+                (upperNoProxyItem.startsWith('.') &&
+                    x.endsWith(`${upperNoProxyItem}`)))) {
             return true;
         }
     }
     return false;
 }
 exports.checkBypass = checkBypass;
+function isLoopbackAddress(host) {
+    const hostLower = host.toLowerCase();
+    return (hostLower === 'localhost' ||
+        hostLower.startsWith('127.') ||
+        hostLower.startsWith('[::1]') ||
+        hostLower.startsWith('[0:0:0:0:0:0:0:1]'));
+}
 
 });
 
@@ -109770,8 +109785,11 @@ function fixResponseChunkedTransferBadEnding(request, errorCallback) {
 
 		if (headers['transfer-encoding'] === 'chunked' && !headers['content-length']) {
 			response.once('close', function (hadError) {
+				// tests for socket presence, as in some situations the
+				// the 'socket' event is not triggered for the request
+				// (happens in deno), avoids `TypeError`
 				// if a data listener is still present we didn't end cleanly
-				const hasDataListener = socket.listenerCount('data') > 0;
+				const hasDataListener = socket && socket.listenerCount('data') > 0;
 
 				if (hasDataListener && !hadError) {
 					const err = new Error('Premature close');
@@ -110338,7 +110356,7 @@ const nameMap = new Map([
 const macosRelease = release => {
 	release = Number((release || os.release()).split('.')[0]);
 
-	const [name, version] = nameMap.get(release);
+	const [name, version] = nameMap.get(release) || ['Unknown', ''];
 
 	return {
 		name,
@@ -110822,10 +110840,38 @@ var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER ||
 // Max safe segment length for coercion.
 var MAX_SAFE_COMPONENT_LENGTH = 16;
 
+var MAX_SAFE_BUILD_LENGTH = MAX_LENGTH - 6;
+
 // The actual regexps go on exports.re
 var re = exports.re = [];
+var safeRe = exports.safeRe = [];
 var src = exports.src = [];
 var R = 0;
+
+var LETTERDASHNUMBER = '[a-zA-Z0-9-]';
+
+// Replace some greedy regex tokens to prevent regex dos issues. These regex are
+// used internally via the safeRe object since all inputs in this library get
+// normalized first to trim and collapse all extra whitespace. The original
+// regexes are exported for userland consumption and lower level usage. A
+// future breaking change could export the safer regex only with a note that
+// all input should have extra whitespace removed.
+var safeRegexReplacements = [
+  ['\\s', 1],
+  ['\\d', MAX_LENGTH],
+  [LETTERDASHNUMBER, MAX_SAFE_BUILD_LENGTH],
+];
+
+function makeSafeRe (value) {
+  for (var i = 0; i < safeRegexReplacements.length; i++) {
+    var token = safeRegexReplacements[i][0];
+    var max = safeRegexReplacements[i][1];
+    value = value
+      .split(token + '*').join(token + '{0,' + max + '}')
+      .split(token + '+').join(token + '{1,' + max + '}');
+  }
+  return value
+}
 
 // The following Regular Expressions can be used for tokenizing,
 // validating, and parsing SemVer version strings.
@@ -110836,14 +110882,14 @@ var R = 0;
 var NUMERICIDENTIFIER = R++;
 src[NUMERICIDENTIFIER] = '0|[1-9]\\d*';
 var NUMERICIDENTIFIERLOOSE = R++;
-src[NUMERICIDENTIFIERLOOSE] = '[0-9]+';
+src[NUMERICIDENTIFIERLOOSE] = '\\d+';
 
 // ## Non-numeric Identifier
 // Zero or more digits, followed by a letter or hyphen, and then zero or
 // more letters, digits, or hyphens.
 
 var NONNUMERICIDENTIFIER = R++;
-src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*';
+src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-]' + LETTERDASHNUMBER + '*';
 
 // ## Main Version
 // Three dot-separated numeric identifiers.
@@ -110885,7 +110931,7 @@ src[PRERELEASELOOSE] = '(?:-?(' + src[PRERELEASEIDENTIFIERLOOSE] +
 // Any combination of digits, letters, or hyphens.
 
 var BUILDIDENTIFIER = R++;
-src[BUILDIDENTIFIER] = '[0-9A-Za-z-]+';
+src[BUILDIDENTIFIER] = LETTERDASHNUMBER + '+';
 
 // ## Build Metadata
 // Plus sign, followed by one or more period-separated build metadata
@@ -110970,6 +111016,7 @@ src[LONETILDE] = '(?:~>?)';
 var TILDETRIM = R++;
 src[TILDETRIM] = '(\\s*)' + src[LONETILDE] + '\\s+';
 re[TILDETRIM] = new RegExp(src[TILDETRIM], 'g');
+safeRe[TILDETRIM] = new RegExp(makeSafeRe(src[TILDETRIM]), 'g');
 var tildeTrimReplace = '$1~';
 
 var TILDE = R++;
@@ -110985,6 +111032,7 @@ src[LONECARET] = '(?:\\^)';
 var CARETTRIM = R++;
 src[CARETTRIM] = '(\\s*)' + src[LONECARET] + '\\s+';
 re[CARETTRIM] = new RegExp(src[CARETTRIM], 'g');
+safeRe[CARETTRIM] = new RegExp(makeSafeRe(src[CARETTRIM]), 'g');
 var caretTrimReplace = '$1^';
 
 var CARET = R++;
@@ -111006,6 +111054,7 @@ src[COMPARATORTRIM] = '(\\s*)' + src[GTLT] +
 
 // this one has to use the /g flag
 re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], 'g');
+safeRe[COMPARATORTRIM] = new RegExp(makeSafeRe(src[COMPARATORTRIM]), 'g');
 var comparatorTrimReplace = '$1$2$3';
 
 // Something like `1.2.3 - 1.2.4`
@@ -111034,6 +111083,14 @@ for (var i = 0; i < R; i++) {
   debug(i, src[i]);
   if (!re[i]) {
     re[i] = new RegExp(src[i]);
+
+    // Replace all greedy whitespace to prevent regex dos issues. These regex are
+    // used internally via the safeRe object since all inputs in this library get
+    // normalized first to trim and collapse all extra whitespace. The original
+    // regexes are exported for userland consumption and lower level usage. A
+    // future breaking change could export the safer regex only with a note that
+    // all input should have extra whitespace removed.
+    safeRe[i] = new RegExp(makeSafeRe(src[i]));
   }
 }
 
@@ -111058,7 +111115,7 @@ function parse (version, options) {
     return null
   }
 
-  var r = options.loose ? re[LOOSE] : re[FULL];
+  var r = options.loose ? safeRe[LOOSE] : safeRe[FULL];
   if (!r.test(version)) {
     return null
   }
@@ -111113,7 +111170,7 @@ function SemVer (version, options) {
   this.options = options;
   this.loose = !!options.loose;
 
-  var m = version.trim().match(options.loose ? re[LOOSE] : re[FULL]);
+  var m = version.trim().match(options.loose ? safeRe[LOOSE] : safeRe[FULL]);
 
   if (!m) {
     throw new TypeError('Invalid Version: ' + version)
@@ -111527,6 +111584,7 @@ function Comparator (comp, options) {
     return new Comparator(comp, options)
   }
 
+  comp = comp.trim().split(/\s+/).join(' ');
   debug('comparator', comp, options);
   this.options = options;
   this.loose = !!options.loose;
@@ -111543,7 +111601,7 @@ function Comparator (comp, options) {
 
 var ANY = {};
 Comparator.prototype.parse = function (comp) {
-  var r = this.options.loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
+  var r = this.options.loose ? safeRe[COMPARATORLOOSE] : safeRe[COMPARATOR];
   var m = comp.match(r);
 
   if (!m) {
@@ -111657,9 +111715,16 @@ function Range (range, options) {
   this.loose = !!options.loose;
   this.includePrerelease = !!options.includePrerelease;
 
+  // First reduce all whitespace as much as possible so we do not have to rely
+  // on potentially slow regexes like \s*. This is then stored and used for
+  // future error messages as well.
+  this.raw = range
+    .trim()
+    .split(/\s+/)
+    .join(' ');
+
   // First, split based on boolean or ||
-  this.raw = range;
-  this.set = range.split(/\s*\|\|\s*/).map(function (range) {
+  this.set = this.raw.split('||').map(function (range) {
     return this.parseRange(range.trim())
   }, this).filter(function (c) {
     // throw out any that are not relevant for whatever reason
@@ -111667,7 +111732,7 @@ function Range (range, options) {
   });
 
   if (!this.set.length) {
-    throw new TypeError('Invalid SemVer Range: ' + range)
+    throw new TypeError('Invalid SemVer Range: ' + this.raw)
   }
 
   this.format();
@@ -111686,28 +111751,23 @@ Range.prototype.toString = function () {
 
 Range.prototype.parseRange = function (range) {
   var loose = this.options.loose;
-  range = range.trim();
   // `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
-  var hr = loose ? re[HYPHENRANGELOOSE] : re[HYPHENRANGE];
+  var hr = loose ? safeRe[HYPHENRANGELOOSE] : safeRe[HYPHENRANGE];
   range = range.replace(hr, hyphenReplace);
   debug('hyphen replace', range);
   // `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
-  range = range.replace(re[COMPARATORTRIM], comparatorTrimReplace);
-  debug('comparator trim', range, re[COMPARATORTRIM]);
+  range = range.replace(safeRe[COMPARATORTRIM], comparatorTrimReplace);
+  debug('comparator trim', range, safeRe[COMPARATORTRIM]);
 
   // `~ 1.2.3` => `~1.2.3`
-  range = range.replace(re[TILDETRIM], tildeTrimReplace);
+  range = range.replace(safeRe[TILDETRIM], tildeTrimReplace);
 
   // `^ 1.2.3` => `^1.2.3`
-  range = range.replace(re[CARETTRIM], caretTrimReplace);
-
-  // normalize spaces
-  range = range.split(/\s+/).join(' ');
+  range = range.replace(safeRe[CARETTRIM], caretTrimReplace);
 
   // At this point, the range is completely trimmed and
   // ready to be split into comparators.
-
-  var compRe = loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
+  var compRe = loose ? safeRe[COMPARATORLOOSE] : safeRe[COMPARATOR];
   var set = range.split(' ').map(function (comp) {
     return parseComparator(comp, this.options)
   }, this).join(' ').split(/\s+/);
@@ -111783,7 +111843,7 @@ function replaceTildes (comp, options) {
 }
 
 function replaceTilde (comp, options) {
-  var r = options.loose ? re[TILDELOOSE] : re[TILDE];
+  var r = options.loose ? safeRe[TILDELOOSE] : safeRe[TILDE];
   return comp.replace(r, function (_, M, m, p, pr) {
     debug('tilde', comp, _, M, m, p, pr);
     var ret;
@@ -111824,7 +111884,7 @@ function replaceCarets (comp, options) {
 
 function replaceCaret (comp, options) {
   debug('caret', comp, options);
-  var r = options.loose ? re[CARETLOOSE] : re[CARET];
+  var r = options.loose ? safeRe[CARETLOOSE] : safeRe[CARET];
   return comp.replace(r, function (_, M, m, p, pr) {
     debug('caret', comp, _, M, m, p, pr);
     var ret;
@@ -111883,7 +111943,7 @@ function replaceXRanges (comp, options) {
 
 function replaceXRange (comp, options) {
   comp = comp.trim();
-  var r = options.loose ? re[XRANGELOOSE] : re[XRANGE];
+  var r = options.loose ? safeRe[XRANGELOOSE] : safeRe[XRANGE];
   return comp.replace(r, function (ret, gtlt, M, m, p, pr) {
     debug('xRange', comp, ret, gtlt, M, m, p, pr);
     var xM = isX(M);
@@ -111953,10 +112013,10 @@ function replaceXRange (comp, options) {
 function replaceStars (comp, options) {
   debug('replaceStars', comp, options);
   // Looseness is ignored here.  star is always as loose as it gets!
-  return comp.trim().replace(re[STAR], '')
+  return comp.trim().replace(safeRe[STAR], '')
 }
 
-// This function is passed to string.replace(re[HYPHENRANGE])
+// This function is passed to string.replace(safeRe[HYPHENRANGE])
 // M, m, patch, prerelease, build
 // 1.2 - 3.4.5 => >=1.2.0 <=3.4.5
 // 1.2.3 - 3.4 => >=1.2.0 <3.5.0 Any 3.4.x will do
@@ -112267,7 +112327,7 @@ function coerce (version) {
     return null
   }
 
-  var match = version.match(re[COERCE]);
+  var match = version.match(safeRe[COERCE]);
 
   if (match == null) {
     return null
@@ -112280,44 +112340,45 @@ function coerce (version) {
 });
 var semver_1 = semver.SEMVER_SPEC_VERSION;
 var semver_2 = semver.re;
-var semver_3 = semver.src;
-var semver_4 = semver.parse;
-var semver_5 = semver.valid;
-var semver_6 = semver.clean;
-var semver_7 = semver.SemVer;
-var semver_8 = semver.inc;
-var semver_9 = semver.diff;
-var semver_10 = semver.compareIdentifiers;
-var semver_11 = semver.rcompareIdentifiers;
-var semver_12 = semver.major;
-var semver_13 = semver.minor;
-var semver_14 = semver.patch;
-var semver_15 = semver.compare;
-var semver_16 = semver.compareLoose;
-var semver_17 = semver.rcompare;
-var semver_18 = semver.sort;
-var semver_19 = semver.rsort;
-var semver_20 = semver.gt;
-var semver_21 = semver.lt;
-var semver_22 = semver.eq;
-var semver_23 = semver.neq;
-var semver_24 = semver.gte;
-var semver_25 = semver.lte;
-var semver_26 = semver.cmp;
-var semver_27 = semver.Comparator;
-var semver_28 = semver.Range;
-var semver_29 = semver.toComparators;
-var semver_30 = semver.satisfies;
-var semver_31 = semver.maxSatisfying;
-var semver_32 = semver.minSatisfying;
-var semver_33 = semver.minVersion;
-var semver_34 = semver.validRange;
-var semver_35 = semver.ltr;
-var semver_36 = semver.gtr;
-var semver_37 = semver.outside;
-var semver_38 = semver.prerelease;
-var semver_39 = semver.intersects;
-var semver_40 = semver.coerce;
+var semver_3 = semver.safeRe;
+var semver_4 = semver.src;
+var semver_5 = semver.parse;
+var semver_6 = semver.valid;
+var semver_7 = semver.clean;
+var semver_8 = semver.SemVer;
+var semver_9 = semver.inc;
+var semver_10 = semver.diff;
+var semver_11 = semver.compareIdentifiers;
+var semver_12 = semver.rcompareIdentifiers;
+var semver_13 = semver.major;
+var semver_14 = semver.minor;
+var semver_15 = semver.patch;
+var semver_16 = semver.compare;
+var semver_17 = semver.compareLoose;
+var semver_18 = semver.rcompare;
+var semver_19 = semver.sort;
+var semver_20 = semver.rsort;
+var semver_21 = semver.gt;
+var semver_22 = semver.lt;
+var semver_23 = semver.eq;
+var semver_24 = semver.neq;
+var semver_25 = semver.gte;
+var semver_26 = semver.lte;
+var semver_27 = semver.cmp;
+var semver_28 = semver.Comparator;
+var semver_29 = semver.Range;
+var semver_30 = semver.toComparators;
+var semver_31 = semver.satisfies;
+var semver_32 = semver.maxSatisfying;
+var semver_33 = semver.minSatisfying;
+var semver_34 = semver.minVersion;
+var semver_35 = semver.validRange;
+var semver_36 = semver.ltr;
+var semver_37 = semver.gtr;
+var semver_38 = semver.outside;
+var semver_39 = semver.prerelease;
+var semver_40 = semver.intersects;
+var semver_41 = semver.coerce;
 
 const isWin = process.platform === 'win32';
 const isExecutableRegExp = /\.(?:com|exe)$/i;
@@ -113734,19 +113795,46 @@ exports.getUserAgent = getUserAgent;
 unwrapExports(distNode$8);
 var distNode_1$8 = distNode$8.getUserAgent;
 
-var name = "@octokit/rest";
-var version = "16.43.2";
-var publishConfig = {
-	access: "public"
+var _from = "@octokit/rest@^16.15.0";
+var _id = "@octokit/rest@16.43.2";
+var _inBundle = false;
+var _integrity = "sha512-ngDBevLbBTFfrHZeiS7SAMAZ6ssuVmXuya+F/7RaVvlysgGa1JKJkKWY+jV6TCJYcW0OALfJ7nTIGXcBXzycfQ==";
+var _location = "/@octokit/rest";
+var _phantomChildren = {
+	"os-name": "3.1.0"
 };
-var description = "GitHub REST API client for Node.js";
-var keywords = [
-	"octokit",
-	"github",
-	"rest",
-	"api-client"
+var _requested = {
+	type: "range",
+	registry: true,
+	raw: "@octokit/rest@^16.15.0",
+	name: "@octokit/rest",
+	escapedName: "@octokit%2frest",
+	scope: "@octokit",
+	rawSpec: "^16.15.0",
+	saveSpec: null,
+	fetchSpec: "^16.15.0"
+};
+var _requiredBy = [
+	"/@actions/github"
 ];
-var author = "Gregor Martynus (https://github.com/gr2m)";
+var _resolved = "https://registry.npmjs.org/@octokit/rest/-/rest-16.43.2.tgz";
+var _shasum = "c53426f1e1d1044dee967023e3279c50993dd91b";
+var _spec = "@octokit/rest@^16.15.0";
+var _where = "/Users/ninad.sakhardande/dev/stackadapt/go/src/lcov-reporter-action/node_modules/@actions/github";
+var author = {
+	name: "Gregor Martynus",
+	url: "https://github.com/gr2m"
+};
+var bugs = {
+	url: "https://github.com/octokit/rest.js/issues"
+};
+var bundleDependencies = false;
+var bundlesize = [
+	{
+		path: "./dist/octokit-rest.min.js.gz",
+		maxSize: "33 kB"
+	}
+];
 var contributors = [
 	{
 		name: "Mike de Boer",
@@ -113765,7 +113853,6 @@ var contributors = [
 		url: "https://github.com/gr2m"
 	}
 ];
-var repository = "https://github.com/octokit/rest.js";
 var dependencies = {
 	"@octokit/auth-token": "^2.4.0",
 	"@octokit/plugin-paginate-rest": "^1.1.1",
@@ -113784,6 +113871,8 @@ var dependencies = {
 	once: "^1.4.0",
 	"universal-user-agent": "^4.0.0"
 };
+var deprecated = false;
+var description = "GitHub REST API client for Node.js";
 var devDependencies = {
 	"@gimenete/type-writer": "^0.1.3",
 	"@octokit/auth": "^1.1.1",
@@ -113819,40 +113908,28 @@ var devDependencies = {
 	"webpack-bundle-analyzer": "^3.0.0",
 	"webpack-cli": "^3.0.0"
 };
-var types = "index.d.ts";
-var scripts = {
-	coverage: "nyc report --reporter=html && open coverage/index.html",
-	lint: "prettier --check '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json",
-	"lint:fix": "prettier --write '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json",
-	pretest: "npm run -s lint",
-	test: "nyc mocha test/mocha-node-setup.js \"test/*/**/*-test.js\"",
-	"test:browser": "cypress run --browser chrome",
-	build: "npm-run-all build:*",
-	"build:ts": "npm run -s update-endpoints:typescript",
-	"prebuild:browser": "mkdirp dist/",
-	"build:browser": "npm-run-all build:browser:*",
-	"build:browser:development": "webpack --mode development --entry . --output-library=Octokit --output=./dist/octokit-rest.js --profile --json > dist/bundle-stats.json",
-	"build:browser:production": "webpack --mode production --entry . --plugin=compression-webpack-plugin --output-library=Octokit --output-path=./dist --output-filename=octokit-rest.min.js --devtool source-map",
-	"generate-bundle-report": "webpack-bundle-analyzer dist/bundle-stats.json --mode=static --no-open --report dist/bundle-report.html",
-	"update-endpoints": "npm-run-all update-endpoints:*",
-	"update-endpoints:fetch-json": "node scripts/update-endpoints/fetch-json",
-	"update-endpoints:typescript": "node scripts/update-endpoints/typescript",
-	"prevalidate:ts": "npm run -s build:ts",
-	"validate:ts": "tsc --target es6 --noImplicitAny index.d.ts",
-	"postvalidate:ts": "tsc --noEmit --target es6 test/typescript-validate.ts",
-	"start-fixtures-server": "octokit-fixtures-server"
-};
-var license = "MIT";
 var files = [
 	"index.js",
 	"index.d.ts",
 	"lib",
 	"plugins"
 ];
+var homepage = "https://github.com/octokit/rest.js#readme";
+var keywords = [
+	"octokit",
+	"github",
+	"rest",
+	"api-client"
+];
+var license = "MIT";
+var name = "@octokit/rest";
 var nyc = {
 	ignore: [
 		"test"
 	]
+};
+var publishConfig = {
+	access: "public"
 };
 var release = {
 	publish: [
@@ -113866,51 +113943,105 @@ var release = {
 		}
 	]
 };
-var bundlesize = [
-	{
-		path: "./dist/octokit-rest.min.js.gz",
-		maxSize: "33 kB"
-	}
-];
+var repository = {
+	type: "git",
+	url: "git+https://github.com/octokit/rest.js.git"
+};
+var scripts = {
+	build: "npm-run-all build:*",
+	"build:browser": "npm-run-all build:browser:*",
+	"build:browser:development": "webpack --mode development --entry . --output-library=Octokit --output=./dist/octokit-rest.js --profile --json > dist/bundle-stats.json",
+	"build:browser:production": "webpack --mode production --entry . --plugin=compression-webpack-plugin --output-library=Octokit --output-path=./dist --output-filename=octokit-rest.min.js --devtool source-map",
+	"build:ts": "npm run -s update-endpoints:typescript",
+	coverage: "nyc report --reporter=html && open coverage/index.html",
+	"generate-bundle-report": "webpack-bundle-analyzer dist/bundle-stats.json --mode=static --no-open --report dist/bundle-report.html",
+	lint: "prettier --check '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json",
+	"lint:fix": "prettier --write '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json",
+	"postvalidate:ts": "tsc --noEmit --target es6 test/typescript-validate.ts",
+	"prebuild:browser": "mkdirp dist/",
+	pretest: "npm run -s lint",
+	"prevalidate:ts": "npm run -s build:ts",
+	"start-fixtures-server": "octokit-fixtures-server",
+	test: "nyc mocha test/mocha-node-setup.js \"test/*/**/*-test.js\"",
+	"test:browser": "cypress run --browser chrome",
+	"update-endpoints": "npm-run-all update-endpoints:*",
+	"update-endpoints:fetch-json": "node scripts/update-endpoints/fetch-json",
+	"update-endpoints:typescript": "node scripts/update-endpoints/typescript",
+	"validate:ts": "tsc --target es6 --noImplicitAny index.d.ts"
+};
+var types = "index.d.ts";
+var version = "16.43.2";
 var _package = {
-	name: name,
-	version: version,
-	publishConfig: publishConfig,
-	description: description,
-	keywords: keywords,
+	_from: _from,
+	_id: _id,
+	_inBundle: _inBundle,
+	_integrity: _integrity,
+	_location: _location,
+	_phantomChildren: _phantomChildren,
+	_requested: _requested,
+	_requiredBy: _requiredBy,
+	_resolved: _resolved,
+	_shasum: _shasum,
+	_spec: _spec,
+	_where: _where,
 	author: author,
+	bugs: bugs,
+	bundleDependencies: bundleDependencies,
+	bundlesize: bundlesize,
 	contributors: contributors,
-	repository: repository,
 	dependencies: dependencies,
+	deprecated: deprecated,
+	description: description,
 	devDependencies: devDependencies,
-	types: types,
-	scripts: scripts,
-	license: license,
 	files: files,
+	homepage: homepage,
+	keywords: keywords,
+	license: license,
+	name: name,
 	nyc: nyc,
+	publishConfig: publishConfig,
 	release: release,
-	bundlesize: bundlesize
+	repository: repository,
+	scripts: scripts,
+	types: types,
+	version: version
 };
 
 var _package$1 = /*#__PURE__*/Object.freeze({
 	__proto__: null,
-	name: name,
-	version: version,
-	publishConfig: publishConfig,
-	description: description,
-	keywords: keywords,
+	_from: _from,
+	_id: _id,
+	_inBundle: _inBundle,
+	_integrity: _integrity,
+	_location: _location,
+	_phantomChildren: _phantomChildren,
+	_requested: _requested,
+	_requiredBy: _requiredBy,
+	_resolved: _resolved,
+	_shasum: _shasum,
+	_spec: _spec,
+	_where: _where,
 	author: author,
-	contributors: contributors,
-	repository: repository,
-	dependencies: dependencies,
-	devDependencies: devDependencies,
-	types: types,
-	scripts: scripts,
-	license: license,
-	files: files,
-	nyc: nyc,
-	release: release,
+	bugs: bugs,
+	bundleDependencies: bundleDependencies,
 	bundlesize: bundlesize,
+	contributors: contributors,
+	dependencies: dependencies,
+	deprecated: deprecated,
+	description: description,
+	devDependencies: devDependencies,
+	files: files,
+	homepage: homepage,
+	keywords: keywords,
+	license: license,
+	name: name,
+	nyc: nyc,
+	publishConfig: publishConfig,
+	release: release,
+	repository: repository,
+	scripts: scripts,
+	types: types,
+	version: version,
 	'default': _package
 });
 
