@@ -45,7 +45,7 @@ If set to true, only changed files will be included in the report. Total percent
 If set to true, old comments will be deleted before a new comment is posted
 
 ##### `title` (**Optional**)
-If included, 
+If included, will be added as a title for the comment produced.
 
 ##### `lcov-decrease-threshold` (**Optional**)
 If included, will be added as max allowable threshold or code coverage decrease.
