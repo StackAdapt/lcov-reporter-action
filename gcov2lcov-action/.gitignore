@@ -1,4 +1,5 @@
 *~
 *.lcov
 *.out
-.idea/*
+
+.idea/
