@@ -23,6 +23,7 @@ async function main() {
 	const title = core.getInput("title")
 	const shouldExitIfCoverageDecrease =
 		core.getInput("exit-if-coverage-decrease").toLowerCase() === "true"
+	const covDecreaseThreshold = core.getInput("lcov-decrease-threshold") || "0"
 
 	const raw = await fs.readFile(lcovFile, "utf-8").catch(err => null)
 	if (!raw) {
@@ -62,8 +63,9 @@ async function main() {
 	const lcov = await parse(raw)
 	const baselcov = baseRaw && (await parse(baseRaw))
 	const newdelta = await delta(lcov, baselcov, options)
-	if (newdelta < 0) {
-		console.info(`Coverage after merging is ${newdelta}% compare with baseline branch.`)
+	const threshold = parseFloat(covDecreaseThreshold)
+	if (newdelta < -1*threshold) {
+		console.info(`Coverage after merging is ${newdelta}% compare with baseline branch. Max coverage decrease should be ${threshold}%`)
 		if (shouldExitIfCoverageDecrease) {
 			console.info(`Exiting...`)
 			process.exit(1)
