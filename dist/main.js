@@ -2960,6 +2960,20 @@ const request = withDefaults(endpoint.endpoint, {
   },
 });
 
+function getUserAgent$1() {
+  if (typeof navigator === "object" && "userAgent" in navigator) {
+    return navigator.userAgent;
+  }
+
+  if (typeof process === "object" && "version" in process) {
+    return `Node.js/${process.version.substr(1)} (${process.platform}; ${
+      process.arch
+    })`;
+  }
+
+  return "<environment undetectable>";
+}
+
 const VERSION$1 = "0.0.0-development";
 
 function _buildMessageForResponseErrors(data) {
@@ -3071,7 +3085,7 @@ function withDefaults$1(oldRequest, newDefaults) {
 
 const graphql$1 = withDefaults$1(request, {
   headers: {
-    "user-agent": `octokit-graphql.js/${VERSION$1} ${getUserAgent()}`,
+    "user-agent": `octokit-graphql.js/${VERSION$1} ${getUserAgent$1()}`,
   },
   method: "POST",
   url: "/graphql",
@@ -16352,49 +16366,6 @@ exports.restEndpointMethods = restEndpointMethods;
 unwrapExports(distNode$2);
 var distNode_1$2 = distNode$2.restEndpointMethods;
 
-var isPlainObject_1$1 = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
-});
-
-unwrapExports(isPlainObject_1$1);
-var isPlainObject_2$1 = isPlainObject_1$1.isPlainObject;
-
 var distNode$3 = createCommonjsModule(function (module, exports) {
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -16439,7 +16410,7 @@ function lowercaseKeys(object) {
 function mergeDeep(defaults, options) {
   const result = Object.assign({}, defaults);
   Object.keys(options).forEach(key => {
-    if (isPlainObject_1$1.isPlainObject(options[key])) {
+    if (isPlainObject_1.isPlainObject(options[key])) {
       if (!(key in defaults)) Object.assign(result, {
         [key]: options[key]
       });else result[key] = mergeDeep(defaults[key], options[key]);
@@ -16835,49 +16806,6 @@ exports.getUserAgent = getUserAgent;
 
 unwrapExports(distNode$5);
 var distNode_1$5 = distNode$5.getUserAgent;
-
-var isPlainObject_1$2 = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
-});
-
-unwrapExports(isPlainObject_1$2);
-var isPlainObject_2$2 = isPlainObject_1$2.isPlainObject;
 
 var conversions = {};
 var lib$1 = conversions;
@@ -110016,7 +109944,7 @@ function getBufferResponse(response) {
 function fetchWrapper(requestOptions) {
   const log = requestOptions.request && requestOptions.request.log ? requestOptions.request.log : console;
 
-  if (isPlainObject_1$2.isPlainObject(requestOptions.body) || Array.isArray(requestOptions.body)) {
+  if (isPlainObject_1.isPlainObject(requestOptions.body) || Array.isArray(requestOptions.body)) {
     requestOptions.body = JSON.stringify(requestOptions.body);
   }
 
@@ -113795,46 +113723,19 @@ exports.getUserAgent = getUserAgent;
 unwrapExports(distNode$8);
 var distNode_1$8 = distNode$8.getUserAgent;
 
-var _from = "@octokit/rest@^16.15.0";
-var _id = "@octokit/rest@16.43.2";
-var _inBundle = false;
-var _integrity = "sha512-ngDBevLbBTFfrHZeiS7SAMAZ6ssuVmXuya+F/7RaVvlysgGa1JKJkKWY+jV6TCJYcW0OALfJ7nTIGXcBXzycfQ==";
-var _location = "/@octokit/rest";
-var _phantomChildren = {
-	"os-name": "3.1.0"
+var name = "@octokit/rest";
+var version = "16.43.2";
+var publishConfig = {
+	access: "public"
 };
-var _requested = {
-	type: "range",
-	registry: true,
-	raw: "@octokit/rest@^16.15.0",
-	name: "@octokit/rest",
-	escapedName: "@octokit%2frest",
-	scope: "@octokit",
-	rawSpec: "^16.15.0",
-	saveSpec: null,
-	fetchSpec: "^16.15.0"
-};
-var _requiredBy = [
-	"/@actions/github"
+var description = "GitHub REST API client for Node.js";
+var keywords = [
+	"octokit",
+	"github",
+	"rest",
+	"api-client"
 ];
-var _resolved = "https://registry.npmjs.org/@octokit/rest/-/rest-16.43.2.tgz";
-var _shasum = "c53426f1e1d1044dee967023e3279c50993dd91b";
-var _spec = "@octokit/rest@^16.15.0";
-var _where = "/Users/ninad.sakhardande/dev/stackadapt/go/src/lcov-reporter-action/node_modules/@actions/github";
-var author = {
-	name: "Gregor Martynus",
-	url: "https://github.com/gr2m"
-};
-var bugs = {
-	url: "https://github.com/octokit/rest.js/issues"
-};
-var bundleDependencies = false;
-var bundlesize = [
-	{
-		path: "./dist/octokit-rest.min.js.gz",
-		maxSize: "33 kB"
-	}
-];
+var author = "Gregor Martynus (https://github.com/gr2m)";
 var contributors = [
 	{
 		name: "Mike de Boer",
@@ -113853,6 +113754,7 @@ var contributors = [
 		url: "https://github.com/gr2m"
 	}
 ];
+var repository = "https://github.com/octokit/rest.js";
 var dependencies = {
 	"@octokit/auth-token": "^2.4.0",
 	"@octokit/plugin-paginate-rest": "^1.1.1",
@@ -113871,8 +113773,6 @@ var dependencies = {
 	once: "^1.4.0",
 	"universal-user-agent": "^4.0.0"
 };
-var deprecated = false;
-var description = "GitHub REST API client for Node.js";
 var devDependencies = {
 	"@gimenete/type-writer": "^0.1.3",
 	"@octokit/auth": "^1.1.1",
@@ -113908,28 +113808,40 @@ var devDependencies = {
 	"webpack-bundle-analyzer": "^3.0.0",
 	"webpack-cli": "^3.0.0"
 };
+var types = "index.d.ts";
+var scripts = {
+	coverage: "nyc report --reporter=html && open coverage/index.html",
+	lint: "prettier --check '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json",
+	"lint:fix": "prettier --write '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json",
+	pretest: "npm run -s lint",
+	test: "nyc mocha test/mocha-node-setup.js \"test/*/**/*-test.js\"",
+	"test:browser": "cypress run --browser chrome",
+	build: "npm-run-all build:*",
+	"build:ts": "npm run -s update-endpoints:typescript",
+	"prebuild:browser": "mkdirp dist/",
+	"build:browser": "npm-run-all build:browser:*",
+	"build:browser:development": "webpack --mode development --entry . --output-library=Octokit --output=./dist/octokit-rest.js --profile --json > dist/bundle-stats.json",
+	"build:browser:production": "webpack --mode production --entry . --plugin=compression-webpack-plugin --output-library=Octokit --output-path=./dist --output-filename=octokit-rest.min.js --devtool source-map",
+	"generate-bundle-report": "webpack-bundle-analyzer dist/bundle-stats.json --mode=static --no-open --report dist/bundle-report.html",
+	"update-endpoints": "npm-run-all update-endpoints:*",
+	"update-endpoints:fetch-json": "node scripts/update-endpoints/fetch-json",
+	"update-endpoints:typescript": "node scripts/update-endpoints/typescript",
+	"prevalidate:ts": "npm run -s build:ts",
+	"validate:ts": "tsc --target es6 --noImplicitAny index.d.ts",
+	"postvalidate:ts": "tsc --noEmit --target es6 test/typescript-validate.ts",
+	"start-fixtures-server": "octokit-fixtures-server"
+};
+var license = "MIT";
 var files = [
 	"index.js",
 	"index.d.ts",
 	"lib",
 	"plugins"
 ];
-var homepage = "https://github.com/octokit/rest.js#readme";
-var keywords = [
-	"octokit",
-	"github",
-	"rest",
-	"api-client"
-];
-var license = "MIT";
-var name = "@octokit/rest";
 var nyc = {
 	ignore: [
 		"test"
 	]
-};
-var publishConfig = {
-	access: "public"
 };
 var release = {
 	publish: [
@@ -113943,105 +113855,51 @@ var release = {
 		}
 	]
 };
-var repository = {
-	type: "git",
-	url: "git+https://github.com/octokit/rest.js.git"
-};
-var scripts = {
-	build: "npm-run-all build:*",
-	"build:browser": "npm-run-all build:browser:*",
-	"build:browser:development": "webpack --mode development --entry . --output-library=Octokit --output=./dist/octokit-rest.js --profile --json > dist/bundle-stats.json",
-	"build:browser:production": "webpack --mode production --entry . --plugin=compression-webpack-plugin --output-library=Octokit --output-path=./dist --output-filename=octokit-rest.min.js --devtool source-map",
-	"build:ts": "npm run -s update-endpoints:typescript",
-	coverage: "nyc report --reporter=html && open coverage/index.html",
-	"generate-bundle-report": "webpack-bundle-analyzer dist/bundle-stats.json --mode=static --no-open --report dist/bundle-report.html",
-	lint: "prettier --check '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json",
-	"lint:fix": "prettier --write '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json",
-	"postvalidate:ts": "tsc --noEmit --target es6 test/typescript-validate.ts",
-	"prebuild:browser": "mkdirp dist/",
-	pretest: "npm run -s lint",
-	"prevalidate:ts": "npm run -s build:ts",
-	"start-fixtures-server": "octokit-fixtures-server",
-	test: "nyc mocha test/mocha-node-setup.js \"test/*/**/*-test.js\"",
-	"test:browser": "cypress run --browser chrome",
-	"update-endpoints": "npm-run-all update-endpoints:*",
-	"update-endpoints:fetch-json": "node scripts/update-endpoints/fetch-json",
-	"update-endpoints:typescript": "node scripts/update-endpoints/typescript",
-	"validate:ts": "tsc --target es6 --noImplicitAny index.d.ts"
-};
-var types = "index.d.ts";
-var version = "16.43.2";
+var bundlesize = [
+	{
+		path: "./dist/octokit-rest.min.js.gz",
+		maxSize: "33 kB"
+	}
+];
 var _package = {
-	_from: _from,
-	_id: _id,
-	_inBundle: _inBundle,
-	_integrity: _integrity,
-	_location: _location,
-	_phantomChildren: _phantomChildren,
-	_requested: _requested,
-	_requiredBy: _requiredBy,
-	_resolved: _resolved,
-	_shasum: _shasum,
-	_spec: _spec,
-	_where: _where,
-	author: author,
-	bugs: bugs,
-	bundleDependencies: bundleDependencies,
-	bundlesize: bundlesize,
-	contributors: contributors,
-	dependencies: dependencies,
-	deprecated: deprecated,
-	description: description,
-	devDependencies: devDependencies,
-	files: files,
-	homepage: homepage,
-	keywords: keywords,
-	license: license,
 	name: name,
-	nyc: nyc,
+	version: version,
 	publishConfig: publishConfig,
-	release: release,
+	description: description,
+	keywords: keywords,
+	author: author,
+	contributors: contributors,
 	repository: repository,
-	scripts: scripts,
+	dependencies: dependencies,
+	devDependencies: devDependencies,
 	types: types,
-	version: version
+	scripts: scripts,
+	license: license,
+	files: files,
+	nyc: nyc,
+	release: release,
+	bundlesize: bundlesize
 };
 
 var _package$1 = /*#__PURE__*/Object.freeze({
 	__proto__: null,
-	_from: _from,
-	_id: _id,
-	_inBundle: _inBundle,
-	_integrity: _integrity,
-	_location: _location,
-	_phantomChildren: _phantomChildren,
-	_requested: _requested,
-	_requiredBy: _requiredBy,
-	_resolved: _resolved,
-	_shasum: _shasum,
-	_spec: _spec,
-	_where: _where,
-	author: author,
-	bugs: bugs,
-	bundleDependencies: bundleDependencies,
-	bundlesize: bundlesize,
-	contributors: contributors,
-	dependencies: dependencies,
-	deprecated: deprecated,
-	description: description,
-	devDependencies: devDependencies,
-	files: files,
-	homepage: homepage,
-	keywords: keywords,
-	license: license,
 	name: name,
-	nyc: nyc,
-	publishConfig: publishConfig,
-	release: release,
-	repository: repository,
-	scripts: scripts,
-	types: types,
 	version: version,
+	publishConfig: publishConfig,
+	description: description,
+	keywords: keywords,
+	author: author,
+	contributors: contributors,
+	repository: repository,
+	dependencies: dependencies,
+	devDependencies: devDependencies,
+	types: types,
+	scripts: scripts,
+	license: license,
+	files: files,
+	nyc: nyc,
+	release: release,
+	bundlesize: bundlesize,
 	'default': _package
 });
 
@@ -114050,7 +113908,7 @@ var pkg = getCjsExportFromNamespace(_package$1);
 var parseClientOptions = parseOptions;
 
 const { Deprecation } = distNode$1;
-const { getUserAgent: getUserAgent$1 } = distNode$8;
+const { getUserAgent: getUserAgent$2 } = distNode$8;
 
 
 
@@ -114126,7 +113984,7 @@ function parseOptions(options, log, hook) {
   }
 
   const userAgentOption = clientDefaults.headers["user-agent"];
-  const defaultUserAgent = `octokit.js/${pkg.version} ${getUserAgent$1()}`;
+  const defaultUserAgent = `octokit.js/${pkg.version} ${getUserAgent$2()}`;
 
   clientDefaults.headers["user-agent"] = [userAgentOption, defaultUserAgent]
     .filter(Boolean)
