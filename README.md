@@ -47,6 +47,9 @@ If set to true, old comments will be deleted before a new comment is posted
 ##### `title` (**Optional**)
 If included, will be added as a title for the comment produced.
 
+### `exit-if-coverage-decrease`
+If set to true to fail the action when coverage decreased
+
 ##### `lcov-decrease-threshold` (**Optional**)
 If included, will be added as max allowable threshold or code coverage decrease.
 
