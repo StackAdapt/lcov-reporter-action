@@ -23154,14 +23154,6 @@ async function main$1() {
 	const lcov = await parse$2(raw);
 	const baselcov = baseRaw && (await parse$2(baseRaw));
 	const newdelta = await delta(lcov, baselcov, options);
-	const threshold = parseFloat(covDecreaseThreshold);
-	if (newdelta < -1*threshold) {
-		console.info(`Coverage after merging is ${newdelta}% compare with baseline branch. Max coverage decrease should be ${threshold}%`);
-		if (shouldExitIfCoverageDecrease) {
-			console.info(`Exiting...`);
-			process.exit(1);
-		}
-	}
 
 	const body = diff(lcov, baselcov, options).substring(0, MAX_COMMENT_CHARS);
 
@@ -23183,6 +23175,15 @@ async function main$1() {
 			commit_sha: options.commit,
 			body: body,
 		});
+	}
+
+	const threshold = parseFloat(covDecreaseThreshold);
+	if (newdelta < -1*threshold) {
+		console.info(`Coverage after merging is ${newdelta}% compare with baseline branch. Max coverage decrease should be ${threshold}%`);
+		if (shouldExitIfCoverageDecrease) {
+			console.info(`Exiting...`);
+			process.exit(1);
+		}
 	}
 }
 
