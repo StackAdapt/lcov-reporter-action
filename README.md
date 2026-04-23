@@ -8,20 +8,29 @@ Note that this action does not run any tests, but instead expects the tests to h
 by another action already.
 
 ## How to build the code
-#### NOTE: USE yarn to build, and DO NOT use npm
-#### NOTE: Use Node 16
-Example Build Commands
+
+**Requirements:** Node.js 24+
+
+```bash
+npm install
+npm run build
 ```
-nvm use 16
-yarn install
-yarn build
-```
+
+### Available scripts
+
+| Command | Description |
+|---|---|
+| `npm run build` | Bundle TypeScript source into `dist/main.js` via esbuild |
+| `npm test` | Run unit tests with Vitest |
+| `npm run typecheck` | Run TypeScript type checking |
+| `npm run smoke` | Run smoke tests against the built bundle on Node 24 |
+| `npm run format` | Format source files with Prettier |
 
 ## Example output
 
 Total Coverage: <b>99.39%</b>
 
-<details><summary>Coverage Report</summary><table><tbody><tr><th>File</th><th>Branches</th><th>Funcs</th><th>Lines</th><th>Uncovered Lines</th></tr><tr><td colspan='5'><b>src</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/i18n.tsx'>i18n.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td colspan='5'><b>src/components/i18n</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/i18n/context.tsx'>context.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/i18n/hydrate.tsx'>hydrate.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/i18n/index.tsx'>index.tsx</a></td><td><b>85.71%</b></td><td><b>88.89%</b></td><td>100%</td><td><a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/i18n/index.tsx#L54'>54</a></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/i18n/link.tsx'>link.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td colspan='5'><b>src/components/icon</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/icon/index.tsx'>index.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/icon/props.tsx'>props.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td colspan='5'><b>src/components/layout</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/layout/index.tsx'>index.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td colspan='5'><b>src/components/release-artist-link</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-artist-link/index.tsx'>index.tsx</a></td><td><b>66.67%</b></td><td>100%</td><td>100%</td><td><a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-artist-link/index.tsx#L24'>24</a>, <a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-artist-link/index.tsx#L25'>25</a>, <a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-artist-link/index.tsx#L26'>26</a></td></tr><tr><td colspan='5'><b>src/components/release-companies</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-companies/index.tsx'>index.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td colspan='5'><b>src/components/release-credits</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-credits/index.tsx'>index.tsx</a></td><td><b>85.71%</b></td><td>100%</td><td><b>91.30%</b></td><td><a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-credits/index.tsx#L37'>37</a>, <a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-credits/index.tsx#L38'>38</a>, <a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-credits/index.tsx#L40'>40</a>, <a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-credits/index.tsx#L43'>43</a></td></tr><tr><td colspan='5'><b>src/components/release-format-link</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-format-link/index.tsx'>index.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td colspan='5'><b>src/components/release-header</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-header/index.tsx'>index.tsx</a></td><td><b>58.33%</b></td><td>100%</td><td>100%</td><td><a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-header/index.tsx#L79'>79</a>, <a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-header/index.tsx#L80'>80</a>, <a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-header/index.tsx#L82'>82</a>, <a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-header/index.tsx#L85'>85</a>, <a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-header/index.tsx#L86'>86</a></td></tr><tr><td colspan='5'><b>src/components/release-label-link</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-label-link/index.tsx'>index.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td colspan='5'><b>src/components/release-series-link</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-series-link/index.tsx'>index.tsx</a></td><td><b>0%</b></td><td>100%</td><td>100%</td><td><a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-series-link/index.tsx#L19'>19</a></td></tr><tr><td colspan='5'><b>src/components/release-thumbnail</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-thumbnail/icon.tsx'>icon.tsx</a></td><td><b>50%</b></td><td>100%</td><td><b>83.33%</b></td><td><a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-thumbnail/icon.tsx#L26'>26</a>, <a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-thumbnail/icon.tsx#L30'>30</a></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-thumbnail/index.tsx'>index.tsx</a></td><td><b>75%</b></td><td>100%</td><td>100%</td><td><a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/release-thumbnail/index.tsx#L42'>42</a></td></tr><tr><td colspan='5'><b>src/components/search</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/search/index.tsx'>index.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/search/mock.tsx'>mock.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/components/search/ui.tsx'>ui.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td colspan='5'><b>src/lib</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/lib/add-state.tsx'>add-state.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/lib/intersperse.tsx'>intersperse.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/lib/keycodes.tsx'>keycodes.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/lib/slug.tsx'>slug.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr><tr><td colspan='5'><b>src/services</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/services/autocomplete.tsx'>autocomplete.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr></tbody></table></details>
+<details><summary>Coverage Report</summary><table><tbody><tr><th>File</th><th>Branches</th><th>Funcs</th><th>Lines</th><th>Uncovered Lines</th></tr><tr><td colspan='5'><b>src</b></td></tr><tr><td>&nbsp; &nbsp;<a href='https://github.com/example/foo/blob/f9d42291812ed03bb197e48050ac38ac6befe4e5/src/i18n.tsx'>i18n.tsx</a></td><td>100%</td><td>100%</td><td>100%</td><td></td></tr></tbody></table></details>
 
 ## Inputs
 
@@ -56,9 +65,26 @@ If included, will be added as max allowable threshold or code coverage decrease.
 ## Example usage
 
 ```yml
-uses: romeovs/lcov-reporter-action@v0.2.16
-with:
-  lcov-file: ./coverage/lcov.info
+      - name: Convert .out to lcov file
+        run: go tool gcov2lcov -infile coverage.out -outfile coverage.lcov
+
+      - name: Comment coverage
+        if: (!contains( github.event.pull_request.labels.*.name, 'init' ) && (github.ref != 'refs/heads/main'))
+        uses: StackAdapt/lcov-reporter-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: ./coverage.lcov
+          lcov-base: ./baseline/coverage.lcov
+          filter-changed-files: true
+          delete-old-comments: true
+          lcov-decrease-threshold: 0.1
+
+      - name: Upload artifact baseline lcov
+        if: (contains( github.event.pull_request.labels.*.name, 'init' ) || (github.ref == 'refs/heads/main'))
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseline
+          path: ./coverage.lcov
 ```
 
 ## Acknowledgements
