@@ -1,15 +1,25 @@
-import { details, summary, b, fragment, table, tbody, tr, th, h2 } from "./html"
+import {
+	details,
+	summary,
+	b,
+	fragment,
+	table,
+	tbody,
+	tr,
+	th,
+	h2,
+} from "./html.js"
+import { percentage } from "./lcov.js"
+import { tabulate } from "./tabulate.js"
+import type { LcovEntry, ReportOptions } from "./types.js"
 
-import { percentage } from "./lcov"
-import { tabulate } from "./tabulate"
-
-export function comment(lcov, options) {
+export function comment(lcov: LcovEntry[], options: ReportOptions): string {
 	return fragment(
 		options.title ? h2(options.title) : "",
 		options.base
-			? `Coverage after merging ${b(options.head)} into ${b(
+			? `Coverage after merging ${b(options.head ?? "")} into ${b(
 					options.base,
-			  )} will be`
+				)} will be`
 			: `Coverage for this commit`,
 		table(tbody(tr(th(percentage(lcov).toFixed(2), "%")))),
 		"\n\n",
@@ -24,17 +34,25 @@ export function comment(lcov, options) {
 	)
 }
 
-export function delta(lcov, before, options) {
-        if (!before) {
-                return comment(lcov, options)
-        }
+export function delta(
+	lcov: LcovEntry[],
+	before: LcovEntry[] | null,
+	_options: ReportOptions,
+): number {
+	if (!before) {
+		return 0
+	}
 
-        const pbefore = percentage(before)
-        const pafter = percentage(lcov)
-        return (pafter - pbefore).toFixed(2)
+	const pbefore = percentage(before)
+	const pafter = percentage(lcov)
+	return parseFloat((pafter - pbefore).toFixed(2))
 }
 
-export function diff(lcov, before, options) {
+export function diff(
+	lcov: LcovEntry[],
+	before: LcovEntry[] | null,
+	options: ReportOptions,
+): string {
 	if (!before) {
 		return comment(lcov, options)
 	}
@@ -48,15 +66,13 @@ export function diff(lcov, before, options) {
 	return fragment(
 		options.title ? h2(options.title) : "",
 		options.base
-			? `Coverage after merging ${b(options.head)} into ${b(
+			? `Coverage after merging ${b(options.head ?? "")} into ${b(
 					options.base,
-			  )} will be`
+				)} will be`
 			: `Coverage for this commit`,
 		table(
 			tbody(
-				tr(
-					th("Coverage"), th("Delta"),
-				),
+				tr(th("Coverage"), th("Delta")),
 				tr(
 					th(pafter.toFixed(2), "%"),
 					th(arrow, " ", plus, pdiff.toFixed(2), "%"),
